@@ -1,0 +1,47 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+.pnpm-debug.log*
+
+# Optional npm cache directory
+.npm/
+
+# Optional eslint cache
+.eslintcache
+
+# dotenv environment variables file
+.env
+.env.*
+
+# VSCode settings
+.vscode/
+
+# Mac system files
+.DS_Store
+
+# Logs
+logs
+*.log
+
+# Coverage directory
+coverage/
+
+# Build output
+dist/
+build/
+out/
+
+# Optional REPL history
+.node_repl_history
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional IDE files
+.idea/
+*.sublime-workspace
+*.sublime-project
