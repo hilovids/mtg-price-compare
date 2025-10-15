@@ -85,7 +85,7 @@ async function main() {
         }
         await delay(50);
     }
-    fs.writeFile(`./card_prices_${Date.now()}.json`, JSON.stringify(results, null, 2), err => {
+    fs.writeFile(`./prices_output/card_prices_${Date.now()}.json`, JSON.stringify(results, null, 2), err => {
         if (err) {
             console.error(err);
         }

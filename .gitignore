@@ -45,3 +45,6 @@ out/
 .idea/
 *.sublime-workspace
 *.sublime-project
+
+# Card prices output
+prices_output/*
