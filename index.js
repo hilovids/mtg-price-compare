@@ -1,6 +1,5 @@
 const fs = require('fs');
 const csv = require('csv-parser');
-const { error } = require('console');
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 const markup = 1.2; // 20% markup for checking if a card is above market
