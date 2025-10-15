@@ -1,5 +1,6 @@
 const fs = require('fs');
 const csv = require('csv-parser');
+const { error } = require('console');
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 const markup = 1.2; // 20% markup for checking if a card is above market
@@ -46,7 +47,7 @@ function getPrices(print) {
 
 async function main() {
     const cards = await parseCSV(fileName);
-    const results = { aboveMarket: [], belowMarket: [] };
+    const results = { aboveMarket: [], belowMarket: [], errors: [] };
     for (const card of cards) {
         try {
             const cardData = await searchCardByName(card.Name);
@@ -72,18 +73,34 @@ async function main() {
                 }
             });
             const printingOwned = printPrices.find(p => p.id === cardData.id);
-            const boughtPrice = parseFloat(card["Purchase price"] ?? '0');
-            // console.log(`Lowest Price: $${lowestPrice}, Owned Price: $${ownedPrice}`);
-            if (boughtPrice > lowestPrice * markup) {
-                results.aboveMarket.push({ name: card.Name, boughtPrice, lowestPrice, difference: (boughtPrice - lowestPrice).toFixed(2), percentage: ((boughtPrice - lowestPrice) / lowestPrice * 100).toFixed(2) + "%" });
+            let ownedPrice = 0;
+            switch(card["Foil"]) {
+                case "normal":
+                ownedPrice = parseFloat(printingOwned.prices.usd ?? '0');
+                break;
+                case "foil":
+                ownedPrice = parseFloat(printingOwned.prices.usd_foil ?? printingOwned.prices.usd ?? '0');
+                break;
+                case "etched":
+                ownedPrice = parseFloat(printingOwned.prices.usd_etched ?? printingOwned.prices.usd_foil ?? printingOwned.prices.usd ?? '0');
+                break;
+            }
+            console.log(`Lowest Price: $${lowestPrice}, Owned Price: $${ownedPrice}`);
+            if(ownedPrice === 0) {
+                console.log(`No owned price for ${card.Name}, skipping...`);
+                results.errors.push({ name: card.Name, message: "Owned Price not found" });
+                continue;
+            }
+            if (ownedPrice > lowestPrice * markup) {
+                results.aboveMarket.push({ name: card.Name, ownedPrice, lowestPrice, difference: (ownedPrice - lowestPrice).toFixed(2), percentage: ((ownedPrice - lowestPrice) / lowestPrice * 100).toFixed(2) + "%" });
             } else {
-                results.belowMarket.push({ name: card.Name, boughtPrice, lowestPrice, difference: (boughtPrice - lowestPrice).toFixed(2), percentage: ((boughtPrice - lowestPrice) / lowestPrice * 100).toFixed(2) + "%" });
+                results.belowMarket.push({ name: card.Name, ownedPrice, lowestPrice, difference: (ownedPrice - lowestPrice).toFixed(2), percentage: ((ownedPrice - lowestPrice) / lowestPrice * 100).toFixed(2) + "%" });
             }
 
         } catch (error) {
             console.error(`Error fetching data for card: ${card.Name}`, error);
         }
-        await delay(50);
+        await delay(75);
     }
     fs.writeFile(`./prices_output/card_prices_${Date.now()}.json`, JSON.stringify(results, null, 2), err => {
         if (err) {
